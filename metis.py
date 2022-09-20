@@ -508,6 +508,68 @@ def _result_errcheck(result, func, args):
 METIS_Graph = namedtuple('METIS_Graph',
     'nvtxs ncon xadj adjncy vwgt vsize adjwgt')
 
+"""
+Example 1:
+    col = torch.tensor([1,2,0,2,0,1]).contiguous()
+    edge_weights = torch.tensor([1,2,3,4,5,6]).contiguous()
+    node_weights = torch.tensor([3,4,1,2,5,6,1,2]).contiguous()
+    rowptr = torch.tensor([0,2,4,6]).contiguous()
+    G = metis.csr_to_metis(rowptr, col, node_weights, edge_weights, nodew_dim=2)
+    ret = metis.part_graph(G, nparts=2)
+    print("Resulting partition:")
+    print(ret)
+    print("done")
+
+Output for example 1:
+    Resulting partition:
+    (8, [1, 1, 0])
+    done
+
+Example 2 (partition ogbn-products dataset) 
+
+    dataset = get_dataset('ogbn-products', './dataset')
+    rowptr, col, _  = dataset.adj_t().csr()
+    
+    # Note that you should not directly use torch.ones_like(..) etc. as arguments to csr_to_metis
+    #   because their memory might be reclaimed prior to invoking part_graph.
+    node_weights = torch.ones_like(col,dtype=torch.long, memory_format=torch.legacy_contiguous_format)
+    edge_weights = torch.ones_like(rowptr, memory_format=torch.legacy_contiguous_format)
+    
+    G = metis.csr_to_metis(rowptr.contiguous(), col.contiguous(), node_weights, edge_weights, nodew_dim=1)
+    ret = metis.part_graph(G, nparts=4)
+"""
+
+# PyTorch graph in CSR format to Metis.
+def csr_to_metis(rowptr, col, node_weights, edge_weights, nodesz=None, nodew_dim=None):
+    assert edge_weights != None
+    assert nodew_dim != None
+    assert nodesz == None
+
+    assert rowptr.element_size() == 8
+    assert col.element_size() == 8
+    assert node_weights.element_size() == 8
+    assert edge_weights.element_size() == 8
+    assert nodew_dim != None
+
+    n = len(rowptr)-1
+    m2 = len(col)
+
+    xadj = ctypes.cast(rowptr.data_ptr(), ctypes.POINTER(idx_t))
+    adjncy = ctypes.cast(col.data_ptr(), ctypes.POINTER(idx_t))
+    adjwgt = ctypes.cast(edge_weights.data_ptr(), ctypes.POINTER(idx_t))
+
+    ncon = idx_t(nodew_dim)
+
+    vwgt = ctypes.cast(node_weights.data_ptr(), ctypes.POINTER(idx_t))
+
+    vsize = None
+    
+    return METIS_Graph(idx_t(n), ncon, xadj, adjncy, vwgt, vsize, adjwgt)
+
+
+
+
+
 def networkx_to_metis(G):
     """
     Convert NetworkX graph into something METIS can consume
