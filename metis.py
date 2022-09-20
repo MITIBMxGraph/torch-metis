@@ -532,8 +532,9 @@ Example 2 (partition ogbn-products dataset)
     
     # Note that you should not directly use torch.ones_like(..) etc. as arguments to csr_to_metis
     #   because their memory might be reclaimed prior to invoking part_graph.
-    node_weights = torch.ones_like(col,dtype=torch.long, memory_format=torch.legacy_contiguous_format)
-    edge_weights = torch.ones_like(rowptr, memory_format=torch.legacy_contiguous_format)
+    # Note: Technically the node weight tensor has 1 extra unnecessary element since length of rowptr is (# nodes + 1) 
+    node_weights = torch.ones_like(rowptr,dtype=torch.long, memory_format=torch.legacy_contiguous_format)
+    edge_weights = torch.ones_like(col, memory_format=torch.legacy_contiguous_format)
     
     G = metis.csr_to_metis(rowptr.contiguous(), col.contiguous(), node_weights, edge_weights, nodew_dim=1)
     ret = metis.part_graph(G, nparts=4)
