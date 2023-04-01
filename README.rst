@@ -1,5 +1,5 @@
 
-METIS for Python
+METIS for Python (with support for PyTorch CSR tensors)
 ================
 
 The following is a version of the "METIS wrapper using ctypes" that was
@@ -14,7 +14,8 @@ graphs in PyTorch. Presently, this repository is primarily intended to be used i
 for SALIENT++ for performing graph partitioning. 
 
 
-# Original README
+Original README : METIS for Python
+================
 Wrapper for the METIS library for partitioning graphs (and other stuff).
 
 This library is unrelated to PyMetis, except that they wrap the same library.
