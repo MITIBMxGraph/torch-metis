@@ -33,17 +33,17 @@ class sdist_git(sdist):
 # prevent metis_dll check at setup time
 os.environ['METIS_DLL'] = 'SKIP'
 
-import metis
+import torch_metis
 
 setup(
-    name='metis',
-    version=metis.__version__,
-    author="Ken Watford",
-    author_email="kwatford@gmail.com",
+    name='torch_metis',
+    version=torch_metis.__version__,
+    author="Tim Kaler",
+    author_email="tfk@mit.edu, timkaler@gmail.com",
     url="https://github.com/kw/metis-python",
-    py_modules=['metis'],
+    py_modules=['torch_metis'],
     license='MIT',
-    description="METIS wrapper using ctypes",
+    description="Modified version of the METIS wrapper using ctypes originally written by Ken Watford (kwatford@gmail.com). Original repository https://github.com/kw/metis-python. This package is primarily intended to be used with SALIENT++",
     long_description= open('README.rst').read(),
     cmdclass={'sdist': sdist_git},
     classifiers = [
